@@ -32,7 +32,8 @@ class Player
                     availableDirections.Add((Direction)i);
                 }
             }
-            //Console.Error.WriteLine("Available: " + availableDirections.Count);
+            //Console.Error.WriteLine("Available Directions: " + availableDirections.Count);
+            //Console.Error.WriteLine("Available Locations: " + State.AvailableLocations.Count);
             if (availableDirections.Count > 0)
             {
                 var selectedDirection = availableDirections[(randomGenerator.Next(1, availableDirections.Count)) - 1];
@@ -141,6 +142,8 @@ public class BoardState
             var player = new TronPlayer();
             player.Location = new Point();
             player.RibbonOrigin = new Point();
+            player.RibbonLocations = new List<Point>();
+            player.RemovedFromGame = false;
             if (elements.Length == 4)
             {
                 var originX = -1;
@@ -159,7 +162,6 @@ public class BoardState
             }
             if (this.Players.Count <= l)
             {
-                player.RibbonLocations = new List<Point>();
                 player.RibbonLocations.Add(player.RibbonOrigin);
                 this.Players.Add(player);
                 this.AvailableLocations.Remove(player.RibbonOrigin);
@@ -168,13 +170,14 @@ public class BoardState
             {
                 this.Players[l].Location = player.Location;
             }
-            this.AvailableLocations.Remove(player.Location);
-            if (player.Location.X == -1 && !this.AvailableLocations.Exists(p => p == this.Players[l].RibbonOrigin))
+            if (player.Location.X == -1 && !this.Players[l].RemovedFromGame)
             {
                 this.AvailableLocations.AddRange(this.Players[l].RibbonLocations);
+                this.Players[l].RemovedFromGame = true;
             }
             else if (player.Location != player.RibbonOrigin)
             {
+                this.AvailableLocations.Remove(player.Location);
                 this.Players[l].RibbonLocations.Add(player.Location);
             }
         }
@@ -186,6 +189,7 @@ public class TronPlayer
     public Point Location {get;set;}
     public List<Point> RibbonLocations { get; set; }
     public Point RibbonOrigin { get; set; }
+    public bool RemovedFromGame { get; set; }
 }
 
 public class Point
