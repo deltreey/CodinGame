@@ -8,6 +8,7 @@ class Player
 {
     public static Direction? LastDirection = null;
     public static BoardState State;
+    public static int MyPlayerNumber;
 
     static void Main(String[] args)
     {
@@ -55,6 +56,7 @@ class Player
         var result = string.Empty;
 
         var numberOfLines = GetNumberOfLines(input);
+        MyPlayerNumber = GetPlayerNumber(input);
         for (var i = 0; i < numberOfLines; ++i)
         {
             result += Console.ReadLine() + "\n";
@@ -77,10 +79,23 @@ class Player
         return result;
     }
 
+    private static int GetPlayerNumber(string input)
+    {
+        var result = -1;
+
+        var splitInput = input.Split(' ');
+        if (splitInput.Length > 1)
+        {
+            int.TryParse(splitInput[1], out result);
+        }
+
+        return result;
+    }
+
     private static Trip ComputeTrip(Direction direction)
     {
         var mainAxis = (direction == Direction.UP || direction == Direction.DOWN) ? Axis.Y : Axis.X;
-        var trip = new Trip(mainAxis, (direction == Direction.DOWN || direction == Direction.RIGHT), State.Players[0].Location);
+        var trip = new Trip(mainAxis, (direction == Direction.DOWN || direction == Direction.RIGHT), State.Players[MyPlayerNumber].Location);
         if (State.AvailableLocations.Contains(trip.NewLocation))
         {
             trip.Successful = true;
@@ -97,7 +112,7 @@ class Player
 
 public class BoardState
 {
-    public List<TronPlayer> Players {get;set;}
+    public List<TronPlayer> Players { get; set; }
     public List<Point> AvailableLocations { get; set; }
 
     public BoardState()
