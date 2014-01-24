@@ -119,9 +119,9 @@ public class BoardState
     {
         this.Players = new List<TronPlayer>();
         this.AvailableLocations = new List<Point>();
-        for (var i = 0; i < 29; ++i)
+        for (var i = 0; i < 30; ++i)
         {
-            for (var j = 0; j < 19; ++j)
+            for (var j = 0; j < 20; ++j)
             {
                 this.AvailableLocations.Add(new Point(i, j));
             }
@@ -160,6 +160,7 @@ public class BoardState
             if (this.Players.Count <= l)
             {
                 this.Players.Add(player);
+                this.AvailableLocations.Remove(player.RibbonOrigin);
             }
             else
             {
