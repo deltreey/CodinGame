@@ -6,74 +6,126 @@ using System.Collections.Generic;
 
 class Player
 {
+    public static Direction? LastDirection = null;
+    public static BoardState State;
+
     static void Main(String[] args)
     {
-        var lastDirection = string.Empty;
+        State = new BoardState();
+
         while (true)
         {
             // Read information from standard input
             var consoleText = Console.ReadLine();
-            var numberOfLines = GetNumberOfLines(consoleText);
-            consoleText = string.Empty;
-            for (var i = 0; i < numberOfLines; ++i)
-            {
-                consoleText += Console.ReadLine() + "\n";
-            }
-            consoleText = consoleText.Substring(0, consoleText.Length - 1);
-            var state = GetBoardState(consoleText);
+            var interpretedConsole = InterpretConsole(consoleText);
+            State.UpdateBoard(interpretedConsole);
+
             // Compute logic here
-
-            // Console.Error.WriteLine("Debug messages...");
-            Console.Error.WriteLine("Players: " + state.Players.Count.ToString());
-
-            // Write action to standard output
             var randomGenerator = new Random(DateTime.Now.Millisecond);
-            int rand = randomGenerator.Next(1, 4);
-
-            switch (rand)
+            var availableDirections = new List<Direction>();
+            for (var i = 1; i <= 4; ++i)
             {
-                case 1:
-                    if (lastDirection != "DOWN")
-                    {
-                        lastDirection = "UP";
-                    }
-                    break;
-                case 2:
-                    if (lastDirection != "UP")
-                    {
-                        lastDirection = "DOWN";
-                    }
-                    break;
-                case 3:
-                    if (lastDirection != "RIGHT")
-                    {
-                        lastDirection = "LEFT";
-                    }
-                    break;
-                case 4:
-                    if (lastDirection != "LEFT")
-                    {
-                        lastDirection = "RIGHT";
-                    }
-                    break;
-                default:
-                    break;
+                var trip = ComputeTrip((Direction)i);
+                if (trip.Successful)
+                {
+                    availableDirections.Add((Direction)i);
+                }
             }
-            Console.WriteLine(lastDirection);
+            Console.Error.WriteLine("Available: " + availableDirections.Count);
+            if (availableDirections.Count > 0)
+            {
+                var selectedDirection = availableDirections[(randomGenerator.Next(1, availableDirections.Count)) - 1];
+                var selectedTrip = ComputeTrip(selectedDirection);
+
+                // Console.Error.WriteLine("Debug messages...");
+                //Console.Error.WriteLine("Players: " + state.Players.Count.ToString());
+                Console.Error.WriteLine("X: " + selectedTrip.OriginalLocation.X);
+                Console.Error.WriteLine("Y: " + selectedTrip.OriginalLocation.Y);
+                Console.Error.WriteLine("New X: " + selectedTrip.NewLocation.X);
+                Console.Error.WriteLine("New Y: " + selectedTrip.NewLocation.Y);
+
+                Console.Error.WriteLine("Locations Available: " + State.AvailableLocations.Count);
+                State.AvailableLocations.Remove(selectedTrip.NewLocation);
+                Console.Error.WriteLine("Locations Available: " + State.AvailableLocations.Count);
+
+                // Write action to standard output
+                Go(selectedDirection);
+            }
         }
     }
 
-    private static BoardState GetBoardState(string input)
+    private static string InterpretConsole(string input)
     {
-        var results = new BoardState();
+        var result = string.Empty;
 
-        results.Players = new List<TronPlayer>();
-        Console.Error.WriteLine(input);
-        var lines = input.Split('\n');
-        //Console.Error.WriteLine("Lines: " + lines.Length.ToString());
-        foreach (var line in lines)
+        var numberOfLines = GetNumberOfLines(input);
+        for (var i = 0; i < numberOfLines; ++i)
         {
-            var elements = line.Split(' ');
+            result += Console.ReadLine() + "\n";
+        }
+        result = result.Substring(0, result.Length - 1);
+
+        return result;
+    }
+
+    private static int GetNumberOfLines(string input)
+    {
+        var result = -1;
+
+        var splitInput = input.Split(' ');
+        if (splitInput.Length > 0)
+        {
+            int.TryParse(splitInput[0], out result);
+        }
+
+        return result;
+    }
+
+    private static Trip ComputeTrip(Direction direction)
+    {
+        var mainAxis = (direction == Direction.UP || direction == Direction.DOWN) ? Axis.Y : Axis.X;
+        var trip = new Trip(mainAxis, (direction == Direction.DOWN || direction == Direction.RIGHT), State.Players[0].Location);
+        if (State.AvailableLocations.Contains(trip.NewLocation))
+        {
+            trip.Successful = true;
+        }
+
+        return trip;
+    }
+
+    private static void Go(Direction direction)
+    {
+        Console.WriteLine(direction.ToString());
+    }
+}
+
+public class BoardState
+{
+    public List<TronPlayer> Players {get;set;}
+    public List<Point> AvailableLocations { get; set; }
+
+    public BoardState()
+    {
+        this.Players = new List<TronPlayer>();
+        this.AvailableLocations = new List<Point>();
+        for (var i = 0; i < 29; ++i)
+        {
+            for (var j = 0; j < 19; ++j)
+            {
+                this.AvailableLocations.Add(new Point(i, j));
+            }
+        }
+    }
+
+    public void UpdateBoard(string interpretedInput)
+    {
+        //Console.Error.WriteLine(interpretedInput);
+        var lines = interpretedInput.Split('\n');
+        //Console.Error.WriteLine("Lines: " + lines.Length.ToString());
+
+        for (var l = 0; l < lines.Length; ++l)
+        {
+            var elements = lines[l].Split(' ');
             //Console.Error.WriteLine("Elements: " + elements.Length.ToString());
             var player = new TronPlayer();
             player.Location = new Point();
@@ -94,29 +146,16 @@ class Player
                 player.RibbonOrigin.X = originX;
                 player.RibbonOrigin.Y = originY;
             }
-            results.Players.Add(player);
+            if (this.Players.Count <= l)
+            {
+                this.Players.Add(player);
+            }
+            else
+            {
+                this.Players[l].Location = player.Location;
+            }
         }
-
-        return results;
     }
-
-    private static int GetNumberOfLines(string input)
-    {
-        var result = -1;
-
-        var splitInput = input.Split(' ');
-        if (splitInput.Length > 0)
-        {
-            int.TryParse(splitInput[0], out result);
-        }
-
-        return result;
-    }
-}
-
-public class BoardState
-{
-    public List<TronPlayer> Players {get;set;}
 }
 
 public class TronPlayer
@@ -129,4 +168,95 @@ public class Point
 {
     public int X {get;set;}
     public int Y {get;set;}
+
+    public override bool Equals(object obj)
+    {
+        var result = false;
+
+        if (obj == null)
+        {
+            result = false;
+        }
+        else
+        {
+            var point = obj as Point;
+            if (point.X == this.X && point.Y == this.Y)
+            {
+                result = true;
+            }
+        }
+
+        return result;
+    }
+
+    public override int GetHashCode()
+    {
+        return this.X ^ this.Y;
+    }
+
+    public Point()
+    { }
+
+    public Point(int x, int y)
+    {
+        this.X = x;
+        this.Y = y;
+    }
+}
+
+public enum Direction
+{
+    UP = 1,
+    LEFT = 2,
+    DOWN = 3,
+    RIGHT = 4
+}
+
+public class Trip
+{
+    public Point NewLocation { get; set; }
+    public Point OriginalLocation { get; set; }
+    public bool Successful { get; set; }
+
+    public Trip(Axis axis, bool positiveDirection, Point currentLocation)
+    {
+        this.Successful = false;
+        this.OriginalLocation = currentLocation;
+        if (axis == Axis.X)
+        {
+            if (positiveDirection)
+            {
+                this.NewLocation = new Point(currentLocation.X + 1, currentLocation.Y);
+            }
+            else
+            {
+                this.NewLocation = new Point(currentLocation.X - 1, currentLocation.Y);
+            }
+        }
+        else
+        {
+            if (positiveDirection)
+            {
+                this.NewLocation = new Point(currentLocation.X, currentLocation.Y + 1);
+            }
+            else
+            {
+                this.NewLocation = new Point(currentLocation.X, currentLocation.Y - 1);
+            }
+        }
+    }
+}
+
+public enum InverseDirection
+{
+    DOWN = 1,
+    RIGHT = 2,
+    UP = 3,
+    LEFT = 4
+}
+
+public enum Axis
+{
+    X = 0,
+    Y = 1
 }
