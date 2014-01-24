@@ -159,6 +159,8 @@ public class BoardState
             }
             if (this.Players.Count <= l)
             {
+                player.RibbonLocations = new List<Point>();
+                player.RibbonLocations.Add(player.RibbonOrigin);
                 this.Players.Add(player);
                 this.AvailableLocations.Remove(player.RibbonOrigin);
             }
@@ -167,6 +169,14 @@ public class BoardState
                 this.Players[l].Location = player.Location;
             }
             this.AvailableLocations.Remove(player.Location);
+            if (player.Location.X == -1 && !this.AvailableLocations.Exists(p => p == this.Players[l].RibbonOrigin))
+            {
+                this.AvailableLocations.AddRange(this.Players[l].RibbonLocations);
+            }
+            else if (player.Location != player.RibbonOrigin)
+            {
+                this.Players[l].RibbonLocations.Add(player.Location);
+            }
         }
     }
 }
@@ -174,6 +184,7 @@ public class BoardState
 public class TronPlayer
 {
     public Point Location {get;set;}
+    public List<Point> RibbonLocations { get; set; }
     public Point RibbonOrigin { get; set; }
 }
 
