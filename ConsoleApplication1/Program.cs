@@ -31,7 +31,7 @@ class Player
                     availableDirections.Add((Direction)i);
                 }
             }
-            Console.Error.WriteLine("Available: " + availableDirections.Count);
+            //Console.Error.WriteLine("Available: " + availableDirections.Count);
             if (availableDirections.Count > 0)
             {
                 var selectedDirection = availableDirections[(randomGenerator.Next(1, availableDirections.Count)) - 1];
@@ -39,14 +39,10 @@ class Player
 
                 // Console.Error.WriteLine("Debug messages...");
                 //Console.Error.WriteLine("Players: " + state.Players.Count.ToString());
-                Console.Error.WriteLine("X: " + selectedTrip.OriginalLocation.X);
-                Console.Error.WriteLine("Y: " + selectedTrip.OriginalLocation.Y);
-                Console.Error.WriteLine("New X: " + selectedTrip.NewLocation.X);
-                Console.Error.WriteLine("New Y: " + selectedTrip.NewLocation.Y);
-
-                Console.Error.WriteLine("Locations Available: " + State.AvailableLocations.Count);
-                State.AvailableLocations.Remove(selectedTrip.NewLocation);
-                Console.Error.WriteLine("Locations Available: " + State.AvailableLocations.Count);
+                //Console.Error.WriteLine("X: " + selectedTrip.OriginalLocation.X);
+                //Console.Error.WriteLine("Y: " + selectedTrip.OriginalLocation.Y);
+                //Console.Error.WriteLine("New X: " + selectedTrip.NewLocation.X);
+                //Console.Error.WriteLine("New Y: " + selectedTrip.NewLocation.Y);
 
                 // Write action to standard output
                 Go(selectedDirection);
@@ -154,6 +150,7 @@ public class BoardState
             {
                 this.Players[l].Location = player.Location;
             }
+            this.AvailableLocations.Remove(player.Location);
         }
     }
 }
