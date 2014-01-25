@@ -13,6 +13,7 @@ class Player
     static void Main(String[] args)
     {
         State = new BoardState();
+        var randomGenerator = new Random(DateTime.Now.Millisecond);
 
         while (true)
         {
@@ -22,7 +23,6 @@ class Player
             State.UpdateBoard(interpretedConsole);
 
             // Compute logic here
-            var randomGenerator = new Random(DateTime.Now.Millisecond);
             var availableDirections = new List<Direction>();
             for (var i = 1; i <= 4; ++i)
             {
@@ -48,6 +48,10 @@ class Player
 
                 // Write action to standard output
                 Go(selectedDirection);
+            }
+            else
+            {
+                Console.WriteLine("YOU WOULDN'T KNOW! YOU WEREN'T THERE MAN!");
             }
         }
     }
