@@ -49,6 +49,10 @@ class Player
                 // Write action to standard output
                 Go(selectedDirection);
             }
+            else
+            {
+                Console.WriteLine("YOU WOULDN'T KNOW! YOU WEREN'T THERE MAN!");
+            }
         }
     }
 
