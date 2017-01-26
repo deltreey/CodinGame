@@ -18,17 +18,36 @@ macro_rules! parse_input {
  * the standard input according to the problem statement.
  **/
 fn main() {
+    let mut result: i32 = 0;
+
     let mut input_line = String::new();
     io::stdin().read_line(&mut input_line).unwrap();
     let n = parse_input!(input_line, i32);
+    print_err!("{}", n);
     let mut inputs = String::new();
+
+    let mut values = Vec::new();
+
     io::stdin().read_line(&mut inputs).unwrap();
     for i in inputs.split(" ") {
         let v = parse_input!(i, i32);
+        values.push(v);
     }
-
-    // Write an action using println!("message...");
-    // To debug: print_err!("Debug message...");
-
-    println!("answer");
+    
+    let mut largest: i32 = -999999999;
+    let mut smallest: i32 = 999999999;
+    for v in values {
+        if v > largest {
+            largest = v;
+            smallest = largest;
+        }
+        if v < smallest {
+            smallest = v;
+            if smallest - largest < result {
+                result = smallest - largest;
+            }
+        }
+    }
+    
+    println!("{}", result);
 }
